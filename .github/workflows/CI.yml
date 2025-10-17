@@ -26,11 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: bun
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -91,11 +88,8 @@ jobs:
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v5
-      - name: Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: bun
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -172,7 +166,8 @@ jobs:
             whoami
             env
             freebsd-version
-            npm install -g bun
+            curl -fsSL https://bun.sh/install | bash
+            export PATH="$HOME/.bun/bin:$PATH"
             bun install
             bun run build
             rm -rf node_modules
@@ -209,12 +204,8 @@ jobs:
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v5
-      - name: Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ matrix.node }}
-          cache: bun
-          architecture: ${{ matrix.settings.architecture }}
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
       - name: Download artifacts
@@ -246,11 +237,8 @@ jobs:
     runs-on: ${{ contains(matrix.target, 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v5
-      - name: Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ matrix.node }}
-          cache: bun
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Output docker params
         id: docker
         run: |
@@ -300,11 +288,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: bun
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
       - name: Download artifacts
@@ -333,11 +318,8 @@ jobs:
       - test-wasi
     steps:
       - uses: actions/checkout@v5
-      - name: Setup node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: bun
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
       - name: create npm dirs
