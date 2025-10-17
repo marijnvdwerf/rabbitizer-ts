@@ -1,87 +1,116 @@
-# `@napi-rs/package-template`
+# rabbitizer-ts
 
-![https://github.com/napi-rs/package-template/actions](https://github.com/napi-rs/package-template/workflows/CI/badge.svg)
+MIPS instruction decoder for Node.js and Bun with TypeScript support.
 
-> Template project for writing node packages with napi-rs.
+[![Build Status](https://github.com/marijnvdwerf/rabbitizer-ts/actions/workflows/CI.yml/badge.svg)](https://github.com/marijnvdwerf/rabbitizer-ts/actions/workflows/CI.yml)
+[![npm version](https://img.shields.io/npm/v/@marijnvdwerf/rabbitizer.svg)](https://www.npmjs.com/package/@marijnvdwerf/rabbitizer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# Usage
+## Features
 
-1. Click **Use this template**.
-2. **Clone** your project.
-3. Run `yarn install` to install dependencies.
-4. Run `yarn napi rename -n [@your-scope/package-name] -b [binary-name]` command under the project folder to rename your package.
+- Fast MIPS instruction decoding in JavaScript/TypeScript
+- Full TypeScript type definitions with auto-generation
+- Support for multiple MIPS architectures:
+  - Standard MIPS CPU (I, II, III)
+  - N64 RSP (Reality Signal Processor)
+  - PlayStation R3000 GTE
+  - PlayStation Portable R4000 ALLEGREX
+  - PlayStation 2 R5900 (Emotion Engine)
+- Zero-copy instruction analysis
+- Cross-platform binaries (Linux, macOS, Windows, Android, WASI)
+- Works with both Node.js and Bun
 
-## Install this test package
-
-```bash
-yarn add @napi-rs/package-template
-```
-
-## Ability
-
-### Build
-
-After `yarn build/npm run build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
-
-### Test
-
-With [ava](https://github.com/avajs/ava), run `yarn test/npm run test` to testing native addon. You can also switch to another testing framework if you want.
-
-### CI
-
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@20`, `@node22`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
-
-### Release
-
-Release native package is very difficult in old days. Native packages may ask developers who use it to install `build toolchain` like `gcc/llvm`, `node-gyp` or something more.
-
-With `GitHub actions`, we can easily prebuild a `binary` for major platforms. And with `N-API`, we should never be afraid of **ABI Compatible**.
-
-The other problem is how to deliver prebuild `binary` to users. Downloading it in `postinstall` script is a common way that most packages do it right now. The problem with this solution is it introduced many other packages to download binary that has not been used by `runtime codes`. The other problem is some users may not easily download the binary from `GitHub/CDN` if they are behind a private network (But in most cases, they have a private NPM mirror).
-
-In this package, we choose a better way to solve this problem. We release different `npm packages` for different platforms. And add it to `optionalDependencies` before releasing the `Major` package to npm.
-
-`NPM` will choose which native package should download from `registry` automatically. You can see [npm](./npm) dir for details. And you can also run `yarn add @napi-rs/package-template` to see how it works.
-
-## Develop requirements
-
-- Install the latest `Rust`
-- Install `Node.js@10+` which fully supported `Node-API`
-- Install `yarn@1.x`
-
-## Test in local
-
-- yarn
-- yarn build
-- yarn test
-
-And you will see:
+## Installation
 
 ```bash
-$ ava --verbose
-
-  ✔ sync function from native code
-  ✔ sleep function from native code (201ms)
-  ─
-
-  2 tests passed
-✨  Done in 1.12s.
+npm install @marijnvdwerf/rabbitizer
 ```
 
-## Release package
-
-Ensure you have set your **NPM_TOKEN** in the `GitHub` project setting.
-
-In `Settings -> Secrets`, add **NPM_TOKEN** into it.
-
-When you want to release the package:
+Or with Bun:
 
 ```bash
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
-
-git push
+bun add @marijnvdwerf/rabbitizer
 ```
 
-GitHub actions will do the rest job for you.
+## Quick Start
 
-> WARN: Don't run `npm publish` manually.
+```javascript
+import { Instruction, Utils } from '@marijnvdwerf/rabbitizer'
+
+// Create an instruction from a 32-bit word
+const instr = new Instruction(0x24010001) // addiu $at, $zero, 1
+
+// Disassemble to assembly
+console.log(instr.disassemble()) // "addiu $at, $zero, 0x1"
+
+// Check instruction properties
+console.log(instr.get_opcode()) // 9
+console.log(instr.is_jump())    // false
+console.log(instr.does_load())  // false
+
+// Use utility functions
+console.log(Utils.get_register_name_o32(4)) // "$a0"
+console.log(Utils.sign_extend_immediate(0xffff)) // -1
+```
+
+## API Documentation
+
+### `Instruction`
+
+Represents a decoded MIPS instruction.
+
+**Constructor:** `new Instruction(word: number, vram?: number, category?: string)`
+
+**Properties:**
+- `word: number` - The instruction word
+- `vram: number` - Virtual address
+- `category: string` - Instruction category
+
+**Methods:**
+- `disassemble(immediateOverride?: string, vram?: number): string`
+- `get_opcode(), get_rs(), get_rt(), get_rd(), get_sa(), get_function(), get_immediate(), get_instr_index()` - Bit field getters
+- `is_branch(), is_jump(), is_function_call(), is_return(), does_load(), does_store(), is_nop(), is_pseudo(), is_trap()` - Instruction type checks
+- `modifies_rt(), modifies_rd(), modifies_rs(), reads_rs(), reads_rt(), reads_rd()` - Register analysis
+
+### `Utils`
+
+```typescript
+Utils.sign_extend_immediate(imm: number): number
+Utils.swap_endianness(word: number): number
+Utils.is_power_of_two(val: number): boolean
+Utils.get_register_name_o32(index: number): string
+Utils.get_register_name_numeric(index: number): string
+```
+
+### `Config`
+
+```typescript
+Config.info(): string  // Returns configuration info message
+```
+
+## Development
+
+### Prerequisites
+
+- Node.js 12.0.0+
+- Rust 1.66.1+
+- C compiler
+
+### Build from Source
+
+```bash
+npm install
+npm run build
+npm test
+```
+
+## License
+
+MIT
+
+See [LICENSE](./LICENSE) for details.
+
+## References
+
+- [rabbitizer](https://github.com/Decompollaborate/rabbitizer) - Original C library
+- [rabbitizer-rs](https://crates.io/crates/rabbitizer) - Rust bindings
