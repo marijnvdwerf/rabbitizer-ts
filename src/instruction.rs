@@ -66,7 +66,8 @@ impl Instruction {
         }
     }
 
-    // Bit field getters
+    // ==================== Bit field getters ====================
+
     #[napi]
     pub fn get_opcode(&self) -> u32 {
         self.inner.get_opcode()
@@ -107,7 +108,109 @@ impl Instruction {
         self.inner.get_instr_index()
     }
 
-    // Examination methods - these check what kind of instruction this is
+    #[napi]
+    pub fn get_code(&self) -> u32 {
+        self.inner.get_code()
+    }
+
+    #[napi]
+    pub fn get_code_upper(&self) -> u32 {
+        self.inner.get_code_upper()
+    }
+
+    #[napi]
+    pub fn get_code_lower(&self) -> u32 {
+        self.inner.get_code_lower()
+    }
+
+    #[napi]
+    pub fn get_copraw(&self) -> u32 {
+        self.inner.get_copraw()
+    }
+
+    #[napi]
+    pub fn get_cop0d(&self) -> u32 {
+        self.inner.get_cop0d()
+    }
+
+    #[napi]
+    pub fn get_fs(&self) -> u32 {
+        self.inner.get_fs()
+    }
+
+    #[napi]
+    pub fn get_ft(&self) -> u32 {
+        self.inner.get_ft()
+    }
+
+    #[napi]
+    pub fn get_fd(&self) -> u32 {
+        self.inner.get_fd()
+    }
+
+    #[napi]
+    pub fn get_cop1cs(&self) -> u32 {
+        self.inner.get_cop1cs()
+    }
+
+    #[napi]
+    pub fn get_cop2t(&self) -> u32 {
+        self.inner.get_cop2t()
+    }
+
+    // ==================== Raw value accessors ====================
+
+    #[napi]
+    pub fn raw(&self) -> u32 {
+        self.inner.raw()
+    }
+
+    #[napi]
+    pub fn processed_immediate(&self) -> i32 {
+        self.inner.processed_immediate()
+    }
+
+    #[napi]
+    pub fn instr_index_as_vram(&self) -> u32 {
+        self.inner.instr_index_as_vram()
+    }
+
+    #[napi]
+    pub fn branch_offset(&self) -> i32 {
+        self.inner.branch_offset()
+    }
+
+    #[napi]
+    pub fn branch_offset_generic(&self) -> i32 {
+        self.inner.branch_offset_generic()
+    }
+
+    #[napi]
+    pub fn branch_vram_generic(&self) -> u32 {
+        self.inner.branch_vram_generic()
+    }
+
+    #[napi]
+    pub fn destination_gpr(&self) -> Option<u32> {
+        self.inner.destination_gpr()
+    }
+
+    #[napi]
+    pub fn outputs_to_gpr_zero(&self) -> bool {
+        self.inner.outputs_to_gpr_zero()
+    }
+
+    #[napi]
+    pub fn opcode_name(&self) -> String {
+        self.inner.opcode_name().to_string()
+    }
+
+    #[napi]
+    pub fn instr_id_type_name(&self) -> String {
+        self.inner.instr_id_type_name().to_string()
+    }
+
+    // ==================== Control flow analysis ====================
 
     #[napi]
     pub fn is_branch(&self) -> bool {
@@ -145,6 +248,18 @@ impl Instruction {
     }
 
     #[napi]
+    pub fn is_jumptable_jump(&self) -> bool {
+        self.inner.is_jumptable_jump()
+    }
+
+    #[napi]
+    pub fn has_delay_slot(&self) -> bool {
+        self.inner.has_delay_slot()
+    }
+
+    // ==================== Memory and load/store ====================
+
+    #[napi]
     pub fn does_load(&self) -> bool {
         self.inner.does_load()
     }
@@ -158,6 +273,37 @@ impl Instruction {
     pub fn does_dereference(&self) -> bool {
         self.inner.does_dereference()
     }
+
+    #[napi]
+    pub fn does_link(&self) -> bool {
+        self.inner.does_link()
+    }
+
+    #[napi]
+    pub fn access_type(&self) -> u32 {
+        match self.inner.access_type() {
+            rabbitizer::AccessType::INVALID => 0,
+            rabbitizer::AccessType::BYTE => 1,
+            rabbitizer::AccessType::SHORT => 2,
+            rabbitizer::AccessType::WORD => 3,
+            rabbitizer::AccessType::DOUBLEWORD => 4,
+            rabbitizer::AccessType::QUADWORD => 5,
+            rabbitizer::AccessType::FLOAT => 6,
+            rabbitizer::AccessType::DOUBLEFLOAT => 7,
+            rabbitizer::AccessType::WORD_LEFT => 8,
+            rabbitizer::AccessType::WORD_RIGHT => 9,
+            rabbitizer::AccessType::DOUBLEWORD_LEFT => 10,
+            rabbitizer::AccessType::DOUBLEWORD_RIGHT => 11,
+            rabbitizer::AccessType::MAX => 0,
+        }
+    }
+
+    #[napi]
+    pub fn does_unsigned_memory_access(&self) -> bool {
+        self.inner.does_unsigned_memory_access()
+    }
+
+    // ==================== Register modification analysis ====================
 
     #[napi]
     pub fn modifies_rt(&self) -> bool {
@@ -190,6 +336,60 @@ impl Instruction {
     }
 
     #[napi]
+    pub fn reads_hi(&self) -> bool {
+        self.inner.reads_hi()
+    }
+
+    #[napi]
+    pub fn reads_lo(&self) -> bool {
+        self.inner.reads_lo()
+    }
+
+    #[napi]
+    pub fn modifies_hi(&self) -> bool {
+        self.inner.modifies_hi()
+    }
+
+    #[napi]
+    pub fn modifies_lo(&self) -> bool {
+        self.inner.modifies_lo()
+    }
+
+    // ==================== Floating point register analysis ====================
+
+    #[napi]
+    pub fn modifies_fs(&self) -> bool {
+        self.inner.modifies_fs()
+    }
+
+    #[napi]
+    pub fn modifies_ft(&self) -> bool {
+        self.inner.modifies_ft()
+    }
+
+    #[napi]
+    pub fn modifies_fd(&self) -> bool {
+        self.inner.modifies_fd()
+    }
+
+    #[napi]
+    pub fn reads_fs(&self) -> bool {
+        self.inner.reads_fs()
+    }
+
+    #[napi]
+    pub fn reads_ft(&self) -> bool {
+        self.inner.reads_ft()
+    }
+
+    #[napi]
+    pub fn reads_fd(&self) -> bool {
+        self.inner.reads_fd()
+    }
+
+    // ==================== Instruction classification ====================
+
+    #[napi]
     pub fn is_nop(&self) -> bool {
         self.inner.is_nop()
     }
@@ -212,5 +412,83 @@ impl Instruction {
     #[napi]
     pub fn is_float(&self) -> bool {
         self.inner.is_float()
+    }
+
+    #[napi]
+    pub fn is_double(&self) -> bool {
+        self.inner.is_double()
+    }
+
+    #[napi]
+    pub fn is_unsigned(&self) -> bool {
+        self.inner.is_unsigned()
+    }
+
+    #[napi]
+    pub fn is_valid(&self) -> bool {
+        self.inner.is_valid()
+    }
+
+    #[napi]
+    pub fn is_likely_handwritten(&self) -> bool {
+        self.inner.is_likely_handwritten()
+    }
+
+    #[napi]
+    pub fn not_emitted_by_compilers(&self) -> bool {
+        self.inner.not_emitted_by_compilers()
+    }
+
+    #[napi]
+    pub fn can_be_hi(&self) -> bool {
+        self.inner.can_be_hi()
+    }
+
+    #[napi]
+    pub fn can_be_lo(&self) -> bool {
+        self.inner.can_be_lo()
+    }
+
+    // ==================== Instruction comparison ====================
+
+    #[napi]
+    pub fn same_opcode(&self, other: &Instruction) -> bool {
+        self.inner.same_opcode(&other.inner)
+    }
+
+    #[napi]
+    pub fn same_opcode_but_different_arguments(&self, other: &Instruction) -> bool {
+        self.inner.same_opcode_but_different_arguments(&other.inner)
+    }
+
+    // ==================== Operand analysis ====================
+
+    #[napi]
+    pub fn has_operand(&self, operand: u32) -> bool {
+        // operand is u32 index into OperandType enum
+        // For now, we'll pass through - users need to use raw values
+        unsafe {
+            let op: rabbitizer::OperandType = std::mem::transmute(operand);
+            self.inner.has_operand(op)
+        }
+    }
+
+    #[napi]
+    pub fn has_operand_alias(&self, operand: u32) -> bool {
+        unsafe {
+            let op: rabbitizer::OperandType = std::mem::transmute(operand);
+            self.inner.has_operand_alias(op)
+        }
+    }
+
+    // ==================== Suffix and descriptor ====================
+
+    #[napi]
+    pub fn instr_suffix(&self) -> u32 {
+        match self.inner.instr_suffix() {
+            rabbitizer::InstrSuffix::ALL_NONE => 0,
+            rabbitizer::InstrSuffix::R5900_xyzw => 1,
+            rabbitizer::InstrSuffix::ALL_MAX => 0,
+        }
     }
 }

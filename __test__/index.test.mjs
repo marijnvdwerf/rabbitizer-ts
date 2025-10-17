@@ -29,54 +29,54 @@ test('Instruction disassembly', (t) => {
 
 test('Instruction bit fields', (t) => {
   const instr = new Instruction(0x8c420000)
-  assert.equal(instr.get_opcode(), 35)
-  assert.equal(instr.get_rs(), 2)
-  assert.equal(instr.get_rt(), 2)
-  assert.equal(instr.get_immediate(), 0)
+  assert.equal(instr.getOpcode(), 35)
+  assert.equal(instr.getRs(), 2)
+  assert.equal(instr.getRt(), 2)
+  assert.equal(instr.getImmediate(), 0)
 })
 
 test('Load instruction detection', (t) => {
   const lw = new Instruction(0x8c420000)
-  assert(lw.does_load())
-  assert(!lw.does_store())
+  assert(lw.doesLoad())
+  assert(!lw.doesStore())
 })
 
 test('Store instruction detection', (t) => {
   const sw = new Instruction(0xac420000)
-  assert(sw.does_store())
-  assert(!sw.does_load())
+  assert(sw.doesStore())
+  assert(!sw.doesLoad())
 })
 
 test('Jump instruction detection', (t) => {
   const jal = new Instruction(0x0c000000)
-  assert(jal.is_jump())
-  assert(jal.is_function_call())
+  assert(jal.isJump())
+  assert(jal.isFunctionCall())
 })
 
 test('Branch instruction detection', (t) => {
   const beq = new Instruction(0x10220000)
-  assert(beq.is_branch())
-  assert(!beq.is_jump())
+  assert(beq.isBranch())
+  assert(!beq.isJump())
 })
 
 test('NOP instruction detection', (t) => {
   const nop = new Instruction(0x00000000)
-  assert(nop.is_nop())
+  assert(nop.isNop())
 })
 
 test('Return instruction detection', (t) => {
   const jr = new Instruction(0x03e00008)
-  assert(jr.is_return())
+  assert(jr.isReturn())
 })
 
 test('Register modification detection', (t) => {
   const jalr = new Instruction(0x00a0f809)
-  assert(jalr.modifies_rd())
+  assert(jalr.modifiesRd())
 })
 
 test('Register read detection', (t) => {
   const lw = new Instruction(0x8c420000)
-  assert(lw.reads_rs())
+  assert(lw.readsRs())
 })
 
 test('Different instruction categories', (t) => {
@@ -120,12 +120,12 @@ test('Utility function: power of 2', (t) => {
 
 test('Move instruction detection', (t) => {
   const move = new Instruction(0x00000821)
-  assert(move.maybe_is_move())
+  assert(move.maybeIsMove())
 })
 
 test('Pseudo-instruction detection', (t) => {
   const nop = new Instruction(0x00000000)
-  assert(typeof nop.is_pseudo() === 'boolean')
+  assert(typeof nop.isPseudo() === 'boolean')
 })
 
 test('Vram and address handling', (t) => {
